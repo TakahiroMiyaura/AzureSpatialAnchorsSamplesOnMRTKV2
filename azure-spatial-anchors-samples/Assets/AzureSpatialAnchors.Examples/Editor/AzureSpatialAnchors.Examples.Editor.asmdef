@@ -1,0 +1,17 @@
+{
+    "name": "AzureSpatialAnchors.Examples.Editor",
+    "references": [
+        "AzureSpatialAnchors.Examples"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
+}
