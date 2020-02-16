@@ -50,20 +50,18 @@ Mixed Reality Toolkit V2.2.0はOSの長いパスの問題によってプロジ�
 4. [Microsoft.MixedReality.Toolkit.Unity.Providers.UnityAR.2.2.0.unitypackage]をインポート
 5. [Project]タブから[Assets/MixedRealityToolkit.Staging/UnityAR/Microsoft.MixedReality.Toolkit.Providers.UnityAR]を選択する
 6. [Inspector]タブを選択し、[Assembly Definition References]に[UnityEngine.SpatialTracking]の参照を追加し[Apply]を押下
-7.  [Microsoft.MixedReality.Toolkit.Providers.UnityAR.AzureSpatialAnchors.0.9.0.unitypackage]をインポート
-8. [Microsoft.MixedReality.Toolkit.Extensionkit.0.9.0.unitypackage]をインポート
-9. [[unitypackage/Microsoft.MixedReality.Toolkit.Extensionkit.0.9.0.unitypackage]](https://github.com/TakahiroMiyaura/AzureSpatialAnchorsSamplesOnMRTKV2/tree/master/unitypackages/Microsoft.MixedReality.Toolkit.Extensionkit.0.9.0.unitypackage)をインポート 
-10. [[unitypackage/Microsoft.MixedReality.Toolkit.Providers.UnityAR.AzureSpatialAnchors.0.9.0.unitypackage]](https://github.com/TakahiroMiyaura/AzureSpatialAnchorsSamplesOnMRTKV2/tree/master/unitypackages/Microsoft.MixedReality.Toolkit.Providers.UnityAR.AzureSpatialAnchors.0.9.0.unitypackage)をインポート
-11. TMP Essencialのインポートを行います。
+7. [[unitypackage/Microsoft.MixedReality.Toolkit.Extensionkit.0.9.0.unitypackage]](https://github.com/TakahiroMiyaura/AzureSpatialAnchorsSamplesOnMRTKV2/tree/master/unitypackages/Microsoft.MixedReality.Toolkit.Extensionkit.0.9.0.unitypackage)をインポート 
+8. [[unitypackage/Microsoft.MixedReality.Toolkit.Providers.UnityAR.AzureSpatialAnchors.0.9.0.unitypackage]](https://github.com/TakahiroMiyaura/AzureSpatialAnchorsSamplesOnMRTKV2/tree/master/unitypackages/Microsoft.MixedReality.Toolkit.Providers.UnityAR.AzureSpatialAnchors.0.9.0.unitypackage)をインポート
+9. TMP Essencialのインポートを行います。
     1. [Project]タブから[Assets/AzureSpatialAnchors.Examples/Scenes/AzureSpatialAnchorsBasicDemo.unity]を選択しシーンを開く
     2. シーンを開いたあと、[TMP Importer]ウインドウが表示されるので[Import TMP Essentials]を押してインポートを行う。  
-12. [手順1.]で作成したSpatial Anchorsリソースの[アカウントID], [アカウントKey]を設定する。
+10. [手順1.]で作成したSpatial Anchorsリソースの[アカウントID], [アカウントKey]を設定する。
     1.  [Project]タブから[Assets/AzureSpatialAnchors.SDK/Resouces/SpatialAnchorConfig]を選択
     2.  [Inspector]タブからパラメータを設定する
         * [Autorication Mode]を[APIKey]に設定する
         * [Spatial Anchors Account Id]に[手順1.]で作成したサービスの[アカウントID]を設定する
         * [Spatial Anchors Account Key]に[手順1.]で作成したサービスの[アカウントKey]を設定する
-13. [手順2.]で作成したWebサービスのパスを設定する。
+11. [手順2.]で作成したWebサービスのパスを設定する。
     1.  [Project]タブから[Assets/AzureSpatialAnchors.Examples/Resouces/SpatialAnchorSamplesConfig]を選択
         * [Base Sharing URL]に[手順2.]で作成したAppサービスの[URL]を設定する
 
@@ -113,7 +111,7 @@ $pod install --repo-update
 $open ./Unity-iPhone.xcworkspace
 ```
 
-16. Xcodeが開くのでデバイスにデプロイする
+19. Xcodeが開くのでデバイスにデプロイする
 
 #### UWP（HoloLens）の場合
 1. メニュー[File]-[Build Settings]を選択し、[Build Setting]ウィンドウを表示する
