@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 using System.Collections;
 using System.Collections.Generic;
-using MixedRealityToolkit.Experimental.Extensions.UX;
+using Microsoft.MixedReality.Toolkit.Experimental.Extensions.UX;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;

@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efc1c5e3aec286d4ca8c16d6641f19f4, type: 3}
+  m_Name: UnityARForAzureSpatialAnchorsCameraSettingsProfile
+  m_EditorClassIdentifier: 
+  isCustomProfile: 1
+  poseSource: 6
+  trackingType: 0
+  updateType: 0
+  detectionMode: 1
+  planePrefab: {fileID: 8151457777986619403, guid: fa7ba7bd95f0c8a43b88dae247dffee5,
+    type: 3}

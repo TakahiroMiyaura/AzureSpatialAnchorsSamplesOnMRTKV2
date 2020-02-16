@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Takahiro Miyaura. All rights reserved.
 // Licensed under the MIT license.
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.MixedReality.Toolkit.Input;
-using Microsoft.MixedReality.Toolkit.Input.UnityInput;
 using UnityEngine;
 
 namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
@@ -30,12 +29,13 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             DemoStepComplete
         }
 
+        #region Member Variables
         private readonly Dictionary<AppState, DemoStepParams> stateParams = new Dictionary<AppState, DemoStepParams>
         {
             { AppState.DemoStepCreateSession,new DemoStepParams() { StepMessage = "Next: Create Azure Spatial Anchors Session", StepColor = Color.clear }},
             { AppState.DemoStepConfigSession,new DemoStepParams() { StepMessage = "Next: Configure Azure Spatial Anchors Session", StepColor = Color.clear }},
             { AppState.DemoStepStartSession,new DemoStepParams() { StepMessage = "Next: Start Azure Spatial Anchors Session", StepColor = Color.clear }},
-            { AppState.DemoStepCreateLocalAnchor,new DemoStepParams() { StepMessage = "Tap a surface to add the Local Anchor.", StepColor = Color.blue }},
+            { AppState.DemoStepCreateLocalAnchor,new DemoStepParams() { StepMessage = "Tap a surface to add the Local Anchor.\nAnd Manipulate the Local Anchor position.", StepColor = Color.blue }},
             { AppState.DemoStepSaveCloudAnchor,new DemoStepParams() { StepMessage = "Next: Save Local Anchor to cloud", StepColor = Color.yellow }},
             { AppState.DemoStepSavingCloudAnchor,new DemoStepParams() { StepMessage = "Saving local Anchor to cloud...", StepColor = Color.yellow }},
             { AppState.DemoStepStopSession,new DemoStepParams() { StepMessage = "Next: Stop Azure Spatial Anchors Session", StepColor = Color.green }},
@@ -49,6 +49,8 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
         };
 
         private AppState _currentAppState = AppState.DemoStepCreateSession;
+        private string currentAnchorId = "";
+
         AppState currentAppState
         {
             get
@@ -74,7 +76,13 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             }
         }
 
-        private string currentAnchorId = "";
+        #endregion
+
+        #region Unity Inspector Variables
+
+        #endregion
+
+        #region MonoBehaviour Functions
 
         /// <summary>
         /// Start is called on the frame when a script is enabled just before any
@@ -92,7 +100,44 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             }
             feedbackBox.text = stateParams[currentAppState].StepMessage;
 
+            enableAdvancingOnSelect = false;
+
             Debug.Log("Azure Spatial Anchors Demo script started");
+        }
+
+        /// <summary>
+        /// Update is called every frame, if the MonoBehaviour is enabled.
+        /// </summary>
+        public override void Update()
+        {
+            base.Update();
+
+            if (spawnedObjectMat != null)
+            {
+                float rat = 0.1f;
+                float createProgress = 0f;
+                if (CloudManager.SessionStatus != null)
+                {
+                    createProgress = CloudManager.SessionStatus.RecommendedForCreateProgress;
+                }
+                rat += (Mathf.Min(createProgress, 1) * 0.9f);
+                spawnedObjectMat.color = GetStepColor() * rat;
+            }
+        }
+
+        #endregion
+
+        #region CloudManger Functions
+
+        private void ConfigureSession()
+        {
+            List<string> anchorsToFind = new List<string>();
+            if (currentAppState == AppState.DemoStepCreateSessionForQuery)
+            {
+                anchorsToFind.Add(currentAnchorId);
+            }
+
+            SetAnchorIdsToLocate(anchorsToFind);
         }
 
         protected override void OnCloudAnchorLocated(AnchorLocatedEventArgs args)
@@ -117,36 +162,6 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             }
         }
 
-        /// <summary>
-        /// Update is called every frame, if the MonoBehaviour is enabled.
-        /// </summary>
-        public override void Update()
-        {
-            base.Update();
-
-            if (spawnedObjectMat != null)
-            {
-                float rat = 0.1f;
-                float createProgress = 0f;
-                if (CloudManager.SessionStatus != null)
-                {
-                    createProgress = CloudManager.SessionStatus.RecommendedForCreateProgress;
-                }
-                rat += (Mathf.Min(createProgress, 1) * 0.9f);
-                spawnedObjectMat.color = GetStepColor() * rat;
-            }
-        }
-
-        protected override bool IsPlacingObject()
-        {
-            return currentAppState == AppState.DemoStepCreateLocalAnchor;
-        }
-
-        protected override Color GetStepColor()
-        {
-            return stateParams[currentAppState].StepColor;
-        }
-
         protected override async Task OnSaveCloudAnchorSuccessfulAsync()
         {
             await base.OnSaveCloudAnchorSuccessfulAsync();
@@ -158,9 +173,9 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             // Sanity check that the object is still where we expect
             Pose anchorPose = Pose.identity;
 
-            #if UNITY_ANDROID || UNITY_IOS
+#if UNITY_ANDROID || UNITY_IOS
             anchorPose = currentCloudAnchor.GetPose();
-            #endif
+#endif
             // HoloLens: The position will be set based on the unityARUserAnchor that was located.
 
             SpawnOrMoveCurrentAnchoredObject(anchorPose.position, anchorPose.rotation);
@@ -174,6 +189,10 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
 
             currentAnchorId = string.Empty;
         }
+
+        #endregion
+
+        #region UI Events
 
         public async override Task AdvanceDemoAsync()
         {
@@ -247,15 +266,26 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             }
         }
 
-        private void ConfigureSession()
+        public override void OnSelectInteraction()
         {
-            List<string> anchorsToFind = new List<string>();
-            if (currentAppState == AppState.DemoStepCreateSessionForQuery)
-            {
-                anchorsToFind.Add(currentAnchorId);
-            }
-
-            SetAnchorIdsToLocate(anchorsToFind);
+            if (!IsPlacingObject()) return; 
+            base.OnSelectInteraction();
         }
+
+        #endregion
+
+        #region Other Functions
+
+        protected override bool IsPlacingObject()
+        {
+            return currentAppState == AppState.DemoStepCreateLocalAnchor;
+        }
+
+        protected override Color GetStepColor()
+        {
+            return stateParams[currentAppState].StepColor;
+        }
+
+        #endregion
     }
 }

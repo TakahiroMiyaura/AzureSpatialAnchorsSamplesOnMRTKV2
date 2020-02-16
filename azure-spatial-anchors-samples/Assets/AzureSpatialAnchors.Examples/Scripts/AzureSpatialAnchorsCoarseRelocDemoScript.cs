@@ -1,4 +1,5 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Takahiro Miyaura. All rights reserved.
 // Licensed under the MIT license.
 using System;
 using System.Collections.Generic;
@@ -31,6 +32,7 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             DemoStepComplete
         }
 
+        #region Member Variables
         private readonly Dictionary<AppState, DemoStepParams> stateParams = new Dictionary<AppState, DemoStepParams>
         {
             { AppState.DemoStepSensorSettings,new DemoStepParams() { StepMessage = "Set to sensor types that you want to use", StepColor = Color.clear }},
@@ -39,7 +41,7 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             { AppState.DemoStepStartSession,new DemoStepParams() { StepMessage = "Next: Start Azure Spatial Anchors Session", StepColor = Color.clear }},
             { AppState.DemoStepCreateLocationProvider,new DemoStepParams() { StepMessage = "Next: Create Location Provider", StepColor = Color.clear }},
             { AppState.DemoStepConfigureSensors,new DemoStepParams() { StepMessage = "Next: Configure Sensors", StepColor = Color.clear }},
-            { AppState.DemoStepCreateLocalAnchor,new DemoStepParams() { StepMessage = "Tap a surface to add the Local Anchor.", StepColor = Color.blue }},
+            { AppState.DemoStepCreateLocalAnchor,new DemoStepParams() { StepMessage = "Tap a surface to add the Local Anchor.\nAnd Manipulate the Local Anchor position.", StepColor = Color.blue }},
             { AppState.DemoStepSaveCloudAnchor,new DemoStepParams() { StepMessage = "Next: Save Local Anchor to cloud", StepColor = Color.yellow }},
             { AppState.DemoStepSavingCloudAnchor,new DemoStepParams() { StepMessage = "Saving local Anchor to cloud...", StepColor = Color.yellow }},
             { AppState.DemoStepStopSession,new DemoStepParams() { StepMessage = "Next: Stop Azure Spatial Anchors Session", StepColor = Color.green }},
@@ -82,21 +84,6 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
 
         private PlatformLocationProvider locationProvider;
         private List<GameObject> allDiscoveredAnchors = new List<GameObject>();
-
-        private void EnableCorrectUIControls()
-        {
-            int buttonIndex = 2;
-
-            switch (currentAppState)
-            {
-                case AppState.DemoStepStopSessionForQuery:
-                    XRUXPicker.Instance.GetDemoButtons()[buttonIndex].gameObject.SetActive(true);
-                    break;
-                default:
-                    XRUXPicker.Instance.GetDemoButtons()[buttonIndex].gameObject.SetActive(false);
-                    break;
-            }
-        }
 
         public SensorStatus GeoLocationStatus
         {
@@ -170,6 +157,14 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             }
         }
 
+        #endregion
+
+        #region Unity Inspector Variables
+
+        #endregion
+
+        #region MonoBehaviour Functions
+
         /// <summary>
         /// Start is called on the frame when a script is enabled just before any
         /// of the Update methods are called the first time.
@@ -192,6 +187,46 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             enableAdvancingOnSelect = false;
 
             EnableCorrectUIControls();
+        }
+
+        /// <summary>
+        /// Update is called every frame, if the MonoBehaviour is enabled.
+        /// </summary>
+        public override void Update()
+        {
+            base.Update();
+
+            if (spawnedObjectMat != null)
+            {
+                float rat = 0.1f;
+                float createProgress = 0f;
+                if (CloudManager.SessionStatus != null)
+                {
+                    createProgress = CloudManager.SessionStatus.RecommendedForCreateProgress;
+                }
+                rat += (Mathf.Min(createProgress, 1) * 0.9f);
+                spawnedObjectMat.color = GetStepColor() * rat;
+            }
+        }
+
+        #endregion
+
+        #region CloudManger Functions
+
+        private void ConfigureSession()
+        {
+            const float distanceInMeters = 8.0f;
+            const int maxAnchorsToFind = 25;
+            SetNearDevice(distanceInMeters, maxAnchorsToFind);
+        }
+
+        private void ConfigureSensors()
+        {
+            locationProvider.Sensors.GeoLocationEnabled =
+                SensorPermissionHelper.HasGeoLocationPermission() && SensorSettings.Instance.UseGeoLocation;
+            locationProvider.Sensors.WifiEnabled = SensorPermissionHelper.HasWifiPermission() && SensorSettings.Instance.UseWifi;
+            locationProvider.Sensors.BluetoothEnabled = SensorPermissionHelper.HasBluetoothPermission() && SensorSettings.Instance.UseBluetooth;
+            locationProvider.Sensors.KnownBeaconProximityUuids = CoarseRelocSettings.KnownBluetoothProximityUuids;
         }
 
         protected override void OnCloudAnchorLocated(AnchorLocatedEventArgs args)
@@ -218,47 +253,6 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             }
         }
 
-        public void OnApplicationFocus(bool focusStatus)
-        {
-#if UNITY_ANDROID
-            // We may get additional permissions at runtime. Enable the sensors once app is resumed
-            if (focusStatus && locationProvider != null)
-            {
-                ConfigureSensors();
-            }
-#endif
-        }
-
-        /// <summary>
-        /// Update is called every frame, if the MonoBehaviour is enabled.
-        /// </summary>
-        public override void Update()
-        {
-            base.Update();
-
-            if (spawnedObjectMat != null)
-            {
-                float rat = 0.1f;
-                float createProgress = 0f;
-                if (CloudManager.SessionStatus != null)
-                {
-                    createProgress = CloudManager.SessionStatus.RecommendedForCreateProgress;
-                }
-                rat += (Mathf.Min(createProgress, 1) * 0.9f);
-                spawnedObjectMat.color = GetStepColor() * rat;
-            }
-        }
-
-        protected override bool IsPlacingObject()
-        {
-            return currentAppState == AppState.DemoStepCreateLocalAnchor;
-        }
-
-        protected override Color GetStepColor()
-        {
-            return stateParams[currentAppState].StepColor;
-        }
-
         protected override async Task OnSaveCloudAnchorSuccessfulAsync()
         {
             await base.OnSaveCloudAnchorSuccessfulAsync();
@@ -278,9 +272,19 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             currentAppState = AppState.DemoStepStopSession;
         }
 
-        protected override void OnSaveCloudAnchorFailed(Exception exception)
+        #endregion
+
+        #region UI Events
+
+        public void OnApplicationFocus(bool focusStatus)
         {
-            base.OnSaveCloudAnchorFailed(exception);
+#if UNITY_ANDROID
+            // We may get additional permissions at runtime. Enable the sensors once app is resumed
+            if (focusStatus && locationProvider != null)
+            {
+                ConfigureSensors();
+            }
+#endif
         }
 
         public async override Task AdvanceDemoAsync()
@@ -402,6 +406,43 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             feedbackBox.text = $"Found {spatialAnchors.Count} anchors nearby";
         }
 
+        public override void OnSelectInteraction()
+        {
+            if(spawnedObject == null)
+            { 
+                base.OnSelectInteraction();
+            }
+        }
+
+        #endregion
+
+        #region Other Functions
+
+        private void EnableCorrectUIControls()
+        {
+            int buttonIndex = 2;
+
+            switch (currentAppState)
+            {
+                case AppState.DemoStepStopSessionForQuery:
+                    XRUXPicker.Instance.GetDemoButtons()[buttonIndex].gameObject.SetActive(true);
+                    break;
+                default:
+                    XRUXPicker.Instance.GetDemoButtons()[buttonIndex].gameObject.SetActive(false);
+                    break;
+            }
+        }
+
+        protected override bool IsPlacingObject()
+        {
+            return currentAppState == AppState.DemoStepCreateLocalAnchor;
+        }
+
+        protected override Color GetStepColor()
+        {
+            return stateParams[currentAppState].StepColor;
+        }
+
         protected override void CleanupSpawnedObjects()
         {
             base.CleanupSpawnedObjects();
@@ -413,28 +454,6 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             allDiscoveredAnchors.Clear();
         }
 
-        private void ConfigureSession()
-        {
-            const float distanceInMeters = 8.0f;
-            const int maxAnchorsToFind = 25;
-            SetNearDevice(distanceInMeters, maxAnchorsToFind);
-        }
-
-        private void ConfigureSensors()
-        {
-            locationProvider.Sensors.GeoLocationEnabled =
-                SensorPermissionHelper.HasGeoLocationPermission() && SensorSettings.Instance.UseGeoLocation;
-            locationProvider.Sensors.WifiEnabled = SensorPermissionHelper.HasWifiPermission() && SensorSettings.Instance.UseWifi;
-            locationProvider.Sensors.BluetoothEnabled = SensorPermissionHelper.HasBluetoothPermission() && SensorSettings.Instance.UseBluetooth;
-            locationProvider.Sensors.KnownBeaconProximityUuids = CoarseRelocSettings.KnownBluetoothProximityUuids;
-        }
-
-        public override void OnSelectInteraction()
-        {
-            if(spawnedObject == null)
-            { 
-                base.OnSelectInteraction();
-            }
-        }
+        #endregion
     }
 }

@@ -1,5 +1,15 @@
 {
+  "scopedRegistries": [
+    {
+      "name": "MS Build for Unity",
+      "url": "https://pkgs.dev.azure.com/UnityDeveloperTools/MSBuildForUnity/_packaging/UnityDeveloperTools/npm/registry",
+      "scopes": [
+        "com.microsoft"
+      ]
+    }
+  ],
   "dependencies": {
+    "com.microsoft.msbuildforunity": "0.8.3",
     "com.unity.ads": "2.0.8",
     "com.unity.analytics": "3.3.2",
     "com.unity.collab-proxy": "1.2.16",
@@ -7,6 +17,10 @@
     "com.unity.purchasing": "2.0.6",
     "com.unity.textmeshpro": "2.0.1",
     "com.unity.timeline": "1.0.0",
+    "com.unity.xr.arcore": "2.2.0-preview.2",
+    "com.unity.xr.arfoundation": "2.1.4",
+    "com.unity.xr.arkit": "2.1.2",
+    "com.unity.xr.windowsmr.metro": "1.0.18",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
     "com.unity.modules.assetbundle": "1.0.0",

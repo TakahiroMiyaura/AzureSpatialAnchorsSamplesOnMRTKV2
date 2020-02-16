@@ -1,4 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Takahiro Miyaura. All rights reserved.
 // Licensed under the MIT license.
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,7 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             ModeCount
         }
 
+        #region Member Variables
         private readonly Color[] colors =
         {
             Color.white,
@@ -86,6 +88,18 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             }
         }
 
+        private int locatedCount = 0;
+        private DateTime dueDate = DateTime.Now;
+        private readonly List<GameObject> allSpawnedObjects = new List<GameObject>();
+        private readonly List<Material> allSpawnedMaterials = new List<Material>();
+
+        #endregion
+
+        #region Unity Inspector Variables
+        #endregion
+
+
+        #region MonoBehaviour Functions
         /// <summary>
         /// Start is called on the frame when a script is enabled just before any
         /// of the Update methods are called the first time.
@@ -103,6 +117,8 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
 
             feedbackBox.text = "Find nearby demo.  First, we need to place a few anchors. Tap somewhere to place the first one";
 
+            enableAdvancingOnSelect = false;
+
             Debug.Log("Azure Spatial Anchors Demo script started");
         }
 
@@ -116,61 +132,9 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             HandleCurrentAppState();
         }
 
-        private void HandleCurrentAppState()
-        {
-            int timeLeft = (int)(dueDate - DateTime.Now).TotalSeconds;
-            switch (currentAppState)
-            {
-                case AppState.ReadyToGraph:
-                    feedbackBox.text = "Next: Tap to start a query for all anchors we just made.";
-                    break;
-                case AppState.Graphing:
-                    feedbackBox.text = $"Making sure we can find the anchors we just made. ({locatedCount}/{numToMake})";
-                    break;
-                case AppState.ReadyToSearch:
-                    feedbackBox.text = "Next: Tap to start looking for just the first anchor we placed.";
-                    break;
-                case AppState.Searching:
-                    feedbackBox.text = $"Looking for the first anchor you made. Give up in {timeLeft}";
-                    if (timeLeft < 0)
-                    {
-                        Debug.Log("Out of time");
-                        // Restart the demo..
-                        feedbackBox.text = "Failed to find the first anchor.  Try again.";
-                        currentAppState = AppState.Done;
-                    }
-                    break;
-                case AppState.ReadyToNeighborQuery:
-                    feedbackBox.text = "Next: Tap to start looking for anchors nearby the first anchor we placed.";
-                    break;
-                case AppState.Neighboring:
-                    // We should find all anchors except for the anchor we are using as the source anchor.
-                    feedbackBox.text = $"Looking for anchors nearby the first anchor. {locatedCount}/{numToMake - 1} {timeLeft}";
-                    if (timeLeft < 0)
-                    {
-                        feedbackBox.text = "Failed to find all the neighbors.  Try again.";
-                        currentAppState = AppState.Done;
-                    }
-                    if (locatedCount == numToMake - 1)
-                    {
-                        feedbackBox.text = "Found them all!";
-                        currentAppState = AppState.Done;
-                    }
-                    break;
-            }
-        }
+        #endregion
 
-        protected override bool IsPlacingObject()
-        {
-            return currentAppState == AppState.Placing;
-        }
-
-        protected override Color GetStepColor()
-        {
-            return colors[(int)currentAppState];
-        }
-
-        private int locatedCount = 0;
+        #region CloudManger Functions
 
         protected override void OnCloudAnchorLocated(AnchorLocatedEventArgs args)
         {
@@ -184,9 +148,9 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
                     currentCloudAnchor = args.Anchor;
                     Pose anchorPose = Pose.identity;
 
-                    #if UNITY_ANDROID || UNITY_IOS
+#if UNITY_ANDROID || UNITY_IOS
                     anchorPose = currentCloudAnchor.GetPose();
-                    #endif
+#endif
                     // HoloLens: The position will be set based on the unityARUserAnchor that was located.
 
                     SpawnOrMoveCurrentAnchoredObject(anchorPose.position, anchorPose.rotation);
@@ -209,39 +173,91 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             }
         }
 
-        private DateTime dueDate = DateTime.Now;
-        private readonly List<GameObject> allSpawnedObjects = new List<GameObject>();
-        private readonly List<Material> allSpawnedMaterials = new List<Material>();
-
-        protected override void SpawnOrMoveCurrentAnchoredObject(Vector3 worldPos, Quaternion worldRot)
+        protected override async Task OnSaveCloudAnchorSuccessfulAsync()
         {
-            if (currentCloudAnchor != null && spawnedObjectsInCurrentAppState.ContainsKey(currentCloudAnchor.Identifier))
+            await base.OnSaveCloudAnchorSuccessfulAsync();
+
+            Debug.Log("Anchor created, yay!");
+
+            anchorIds.Add(currentCloudAnchor.Identifier);
+
+            // Sanity check that the object is still where we expect
+            Pose anchorPose = Pose.identity;
+
+#if UNITY_ANDROID || UNITY_IOS
+            anchorPose = currentCloudAnchor.GetPose();
+#endif
+            // HoloLens: The position will be set based on the unityARUserAnchor that was located.
+
+            SpawnOrMoveCurrentAnchoredObject(anchorPose.position, anchorPose.rotation);
+
+            spawnedObject = null;
+            currentCloudAnchor = null;
+            if (allSpawnedObjects.Count < numToMake)
             {
-                spawnedObject = spawnedObjectsInCurrentAppState[currentCloudAnchor.Identifier];
+                feedbackBox.text = $"Saved...Make another {allSpawnedObjects.Count}/{numToMake} ";
+                currentAppState = AppState.Placing;
+                CloudManager.StopSession();
             }
-
-            bool spawnedNewObject = spawnedObject == null;
-
-            base.SpawnOrMoveCurrentAnchoredObject(worldPos, worldRot);
-
-            if (spawnedNewObject)
+            else
             {
-                allSpawnedObjects.Add(spawnedObject);
-                allSpawnedMaterials.Add(spawnedObjectMat);
-
-                if (currentCloudAnchor != null && spawnedObjectsInCurrentAppState.ContainsKey(currentCloudAnchor.Identifier) == false)
-                {
-                    spawnedObjectsInCurrentAppState.Add(currentCloudAnchor.Identifier, spawnedObject);
-                }
+                feedbackBox.text = "Saved... ready to start finding them.";
+                CloudManager.StopSession();
+                currentAppState = AppState.ReadyToGraph;
             }
+        }
 
-            #if WINDOWS_UWP || UNITY_WSA
-            if (currentCloudAnchor != null
-                    && spawnedObjectsInCurrentAppState.ContainsKey(currentCloudAnchor.Identifier) == false)
+        protected override void OnSaveCloudAnchorFailed(Exception exception)
+        {
+            base.OnSaveCloudAnchorFailed(exception);
+        }
+
+        #endregion
+
+        #region UI Events
+
+        private void HandleCurrentAppState()
+        {
+            int timeLeft = (int)(dueDate - DateTime.Now).TotalSeconds;
+            switch (currentAppState)
             {
-                spawnedObjectsInCurrentAppState.Add(currentCloudAnchor.Identifier, spawnedObject);
+                case AppState.ReadyToGraph:
+                    feedbackBox.text = "Next: Push \"next button\" to start a query for all anchors we just made.";
+                    break;
+                case AppState.Graphing:
+                    feedbackBox.text = $"Making sure we can find the anchors we just made. ({locatedCount}/{numToMake})";
+                    break;
+                case AppState.ReadyToSearch:
+                    feedbackBox.text = "Next: Push \"next button\" to start looking for just the first anchor we placed.";
+                    break;
+                case AppState.Searching:
+                    feedbackBox.text = $"Looking for the first anchor you made. Give up in {timeLeft}";
+                    if (timeLeft < 0)
+                    {
+                        Debug.Log("Out of time");
+                        // Restart the demo..
+                        feedbackBox.text = "Failed to find the first anchor.  Try again.";
+                        currentAppState = AppState.Done;
+                    }
+                    break;
+                case AppState.ReadyToNeighborQuery:
+                    feedbackBox.text = "Next: Push \"next button\" to start looking for anchors nearby the first anchor we placed.";
+                    break;
+                case AppState.Neighboring:
+                    // We should find all anchors except for the anchor we are using as the source anchor.
+                    feedbackBox.text = $"Looking for anchors nearby the first anchor. {locatedCount}/{numToMake - 1} {timeLeft}";
+                    if (timeLeft < 0)
+                    {
+                        feedbackBox.text = "Failed to find all the neighbors.  Try again.";
+                        currentAppState = AppState.Done;
+                    }
+                    if (locatedCount == numToMake - 1)
+                    {
+                        feedbackBox.text = "Found them all!";
+                        currentAppState = AppState.Done;
+                    }
+                    break;
             }
-            #endif
         }
 
         public async override Task AdvanceDemoAsync()
@@ -275,45 +291,6 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
                     feedbackBox.text = $"Place an object. {allSpawnedObjects.Count}/{numToMake} ";
                     break;
             }
-        }
-
-        protected override async Task OnSaveCloudAnchorSuccessfulAsync()
-        {
-            await base.OnSaveCloudAnchorSuccessfulAsync();
-
-            Debug.Log("Anchor created, yay!");
-
-            anchorIds.Add(currentCloudAnchor.Identifier);
-
-            // Sanity check that the object is still where we expect
-            Pose anchorPose = Pose.identity;
-
-            #if UNITY_ANDROID || UNITY_IOS
-            anchorPose = currentCloudAnchor.GetPose();
-            #endif
-            // HoloLens: The position will be set based on the unityARUserAnchor that was located.
-
-            SpawnOrMoveCurrentAnchoredObject(anchorPose.position, anchorPose.rotation);
-
-            spawnedObject = null;
-            currentCloudAnchor = null;
-            if (allSpawnedObjects.Count < numToMake)
-            {
-                feedbackBox.text = $"Saved...Make another {allSpawnedObjects.Count}/{numToMake} ";
-                currentAppState = AppState.Placing;
-                CloudManager.StopSession();
-            }
-            else
-            {
-                feedbackBox.text = "Saved... ready to start finding them.";
-                CloudManager.StopSession();
-                currentAppState = AppState.ReadyToGraph;
-            }
-        }
-
-        protected override void OnSaveCloudAnchorFailed(Exception exception)
-        {
-            base.OnSaveCloudAnchorFailed(exception);
         }
 
         private async Task DoGraphingPassAsync()
@@ -353,6 +330,57 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             currentAppState = AppState.Neighboring;
         }
 
+        public override void OnSelectInteraction()
+        {
+            if (!IsPlacingObject()) return;
+            base.OnSelectInteraction();
+        }
+
+        #endregion
+
+        #region Other Functions
+
+        protected override bool IsPlacingObject()
+        {
+            return currentAppState == AppState.Placing;
+        }
+
+        protected override Color GetStepColor()
+        {
+            return colors[(int)currentAppState];
+        }
+
+        protected override void SpawnOrMoveCurrentAnchoredObject(Vector3 worldPos, Quaternion worldRot)
+        {
+            if (currentCloudAnchor != null && spawnedObjectsInCurrentAppState.ContainsKey(currentCloudAnchor.Identifier))
+            {
+                spawnedObject = spawnedObjectsInCurrentAppState[currentCloudAnchor.Identifier];
+            }
+
+            bool spawnedNewObject = spawnedObject == null;
+
+            base.SpawnOrMoveCurrentAnchoredObject(worldPos, worldRot);
+
+            if (spawnedNewObject)
+            {
+                allSpawnedObjects.Add(spawnedObject);
+                allSpawnedMaterials.Add(spawnedObjectMat);
+
+                if (currentCloudAnchor != null && spawnedObjectsInCurrentAppState.ContainsKey(currentCloudAnchor.Identifier) == false)
+                {
+                    spawnedObjectsInCurrentAppState.Add(currentCloudAnchor.Identifier, spawnedObject);
+                }
+            }
+
+#if WINDOWS_UWP || UNITY_WSA
+            if (currentCloudAnchor != null
+                    && spawnedObjectsInCurrentAppState.ContainsKey(currentCloudAnchor.Identifier) == false)
+            {
+                spawnedObjectsInCurrentAppState.Add(currentCloudAnchor.Identifier, spawnedObject);
+            }
+#endif
+        }
+
         private void CleanupObjectsBetweenPasses()
         {
             foreach (GameObject go in allSpawnedObjects)
@@ -373,5 +401,7 @@ namespace Microsoft.Azure.SpatialAnchors.Unity.Examples
             spawnedObjectsPerAppState.Clear();
             anchorIds.Clear();
         }
+
+        #endregion
     }
 }

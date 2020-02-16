@@ -750,11 +750,6 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 0}
-    - target: {fileID: 2204069623052342153, guid: 3f1f46cbecbe08e46a303ccfdb5b498a,
-        type: 3}
-      propertyPath: m_Materials.Array.data[0]
-      value: 
-      objectReference: {fileID: 2100000, guid: 5fad7489643b71c488658404b2636bdb, type: 2}
     - target: {fileID: 7060011145322376313, guid: 3f1f46cbecbe08e46a303ccfdb5b498a,
         type: 3}
       propertyPath: m_textInfo.characterCount
@@ -780,6 +775,11 @@ PrefabInstance:
       propertyPath: m_textInfo.pageCount
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2204069623052342153, guid: 3f1f46cbecbe08e46a303ccfdb5b498a,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 5fad7489643b71c488658404b2636bdb, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3f1f46cbecbe08e46a303ccfdb5b498a, type: 3}
 --- !u!1 &314859757
@@ -811,7 +811,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83d9acc7968244a8886f3af591305bcb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  activeProfile: {fileID: 11400000, guid: fd7de4aeec5edad4699f16123e9fd648, type: 2}
+  activeProfile: {fileID: 11400000, guid: 2f652e50dd223034eb3af1190ee4e834, type: 2}
 --- !u!4 &314859759
 Transform:
   m_ObjectHideFlags: 0
@@ -1538,8 +1538,8 @@ Camera:
   m_GameObject: {fileID: 932646612}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 1}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -1553,7 +1553,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.1
-  far clip plane: 1000
+  far clip plane: 50
   field of view: 60
   orthographic: 0
   orthographic size: 5
@@ -1906,6 +1906,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CoarseRelocDemoScript: {fileID: 1735376942}
+  IgniteDemoScript: {fileID: 0}
   SensorType: 2
   Icon: {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
   AvailableColor: {r: 0, g: 1, b: 0, a: 1}
@@ -2157,6 +2158,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CoarseRelocDemoScript: {fileID: 1735376942}
+  IgniteDemoScript: {fileID: 0}
   SensorType: 1
   Icon: {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
   AvailableColor: {r: 0, g: 1, b: 0, a: 1}
@@ -2828,6 +2830,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CoarseRelocDemoScript: {fileID: 1735376942}
+  IgniteDemoScript: {fileID: 0}
   SensorType: 0
   Icon: {fileID: 2100000, guid: 92f6dee24c8e88f4c98208b30d316ce4, type: 2}
   AvailableColor: {r: 0, g: 1, b: 0, a: 1}
@@ -2930,7 +2933,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1735376941}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 403767981, guid: af8d11bf66126a949b9e13fb9ab984fb, type: 3}
+  m_Script: {fileID: 11500000, guid: 2ef4e40d29b7a564f86f3d2f0abca194, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   authenticationMode: 0
@@ -2938,7 +2941,7 @@ MonoBehaviour:
   spatialAnchorsAccountKey: 
   clientId: 
   tenantId: 
-  logLevel: 1
+  logLevel: 5
 --- !u!4 &1735376944
 Transform:
   m_ObjectHideFlags: 0

@@ -3,7 +3,7 @@
 // http://opensource.org/licenses/mit-license.php
 
 using System.Linq;
-using MixedRealityToolkit.Experimental.Extensions.UX;
+using Microsoft.MixedReality.Toolkit.Experimental.Extensions.UX;
 using Microsoft.MixedReality.Toolkit.UI;
 
 namespace Microsoft.Azure.SpatialAnchors.Unity.Examples

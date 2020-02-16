@@ -109,7 +109,7 @@ Material:
     - _ZWrite: 0
     m_Colors:
     - _CameraFadeParams: {r: 0, g: Infinity, b: 0, a: 0}
-    - _Color: {r: 0.9150943, g: 0.4359647, b: 0.4359647, a: 0.3529412}
+    - _Color: {r: 0.43529406, g: 0.4443762, b: 0.9137255, a: 0.27450982}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _Flip: {r: 1, g: 1, b: 1, a: 1}
     - _PulseColor: {r: 0.14499995, g: 0.44699997, b: 0.922, a: 1}

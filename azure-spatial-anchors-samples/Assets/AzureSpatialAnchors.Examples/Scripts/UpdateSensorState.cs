@@ -18,6 +18,7 @@ public class UpdateSensorState : MonoBehaviour
     }
 
     public AzureSpatialAnchorsCoarseRelocDemoScript CoarseRelocDemoScript;
+    public AzureSpatialAnchorsIgniteDemoScript IgniteDemoScript;
     public Sensor SensorType;
     public Material Icon;
 
@@ -43,7 +44,7 @@ public class UpdateSensorState : MonoBehaviour
         {
             return;
         }
-        if (CoarseRelocDemoScript == null)
+        if (CoarseRelocDemoScript == null && IgniteDemoScript == null)
         {
             Icon.color = MissingProviderColor;
             return;
@@ -52,13 +53,23 @@ public class UpdateSensorState : MonoBehaviour
         switch (SensorType)
         {
             case Sensor.GeoLocation:
+                if(CoarseRelocDemoScript != null)
                 UpdateColor(CoarseRelocDemoScript.GeoLocationStatus);
+                else if(IgniteDemoScript != null)
+                    UpdateColor(IgniteDemoScript.GeoLocationStatus);
                 break;
             case Sensor.Wifi:
-                UpdateColor(CoarseRelocDemoScript.WifiStatus);
+                if (CoarseRelocDemoScript != null)
+                    UpdateColor(CoarseRelocDemoScript.WifiStatus);
+                else if (IgniteDemoScript != null)
+                    UpdateColor(IgniteDemoScript.WifiStatus);
                 break;
             case Sensor.Bluetooth:
-                UpdateColor(CoarseRelocDemoScript.BluetoothStatus);
+
+                if (CoarseRelocDemoScript != null)
+                    UpdateColor(CoarseRelocDemoScript.BluetoothStatus);
+                else if (IgniteDemoScript != null)
+                    UpdateColor(IgniteDemoScript.BluetoothStatus);
                 break;
         }
     }
