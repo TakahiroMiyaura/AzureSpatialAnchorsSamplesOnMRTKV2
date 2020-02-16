@@ -1,1 +1,5 @@
-# Comming soon!
+|name|type|description|
+|:-:|:-:|:--|
+|AzureSpatialAnchors.Examples.unitypackage|Samples|[azure-spatial-anchors-samples](https://github.com/TakahiroMiyaura/AzureSpatialAnchorsSamplesOnMRTKV2/tree/master/azure-spatial-anchors-samples)内のAzureSpatialAnchors.Examplesコード。|
+|Microsoft.MixedReality.Toolkit.Extensionkit.0.9.0.unitypackage|Modules|Mixed Reality Toolkit V2.2.0用の拡張モジュール。<dl><dt>InputTextField.Prefab</dt><dd>クロスプラットフォーム用テキスト入力フィールド（3Dオブジェクト)。テキストフィールドをSelectすることでデバイス毎の仮想キーボード入力による文字入力をサポートする</dd><dt>MixedRealityAdvancedSceneSystem</dt><dd>MRTKが標準で提供するSceneSystemの拡張版。MainContentsの1つを初期起動時に自動的にロードする機能を追加</dd></dl>|
+|Microsoft.MixedReality.Toolkit.Providers.UnityAR.AzureSpatialAnchors.0.9.0.unitypackage|Modules|<p>Mixed Reality Toolkit V2.2.0用のUnityAの拡張モジュール。MRTKのUnityARを拡張し、Azure Spatial Anchorsが利用できるCameraSettings部品</p>|
