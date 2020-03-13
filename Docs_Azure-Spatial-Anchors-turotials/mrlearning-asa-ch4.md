@@ -25,7 +25,7 @@ In this tutorial, you will learn how to save Azure Spatial Anchors across multip
 
 Download and **import** the following Unity custom packages **in the order they are listed**:
 
-* [MRTK.HoloLens2.Unity.Tutorials.Assets.AzureSpatialAnchors.addtional4.unitypackag](./MRTK.HoloLens2.Unity.Tutorials.Assets.AzureSpatialAnchors.addtional4.unitypackag)
+* [MRTK.HoloLens2.Unity.Tutorials.Assets.AzureSpatialAnchors.addtional4.unitypackag](https://github.com/TakahiroMiyaura/AzureSpatialAnchorsSamplesOnMRTKV2/blob/master/Docs_Azure-Spatial-Anchors-turotials/MRTK.HoloLens2.Unity.Tutorials.Assets.AzureSpatialAnchors.addtional4.unitypackage)
 
 > [!TIP]
 > Importing assets, overwrite AnchorModuleScript.cs
